@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
          * Set and initialize the view elements.
          */
         private void initializeView() {
+
             findViewById(R.id.notify_me).setOnClickListener(view -> {
                 startService(new Intent(MainActivity.this, ChatHeadService.class));
                 finish();

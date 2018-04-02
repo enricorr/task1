@@ -10,7 +10,7 @@ import java.util.List;
 @Dao
 public interface ContactoDao {
     @Query("SELECT * FROM contacto")
-    List<Contacto> getAllRepos();
+    List<Contacto> getAllContacts();
 
     @Insert
     void insert(Contacto... repos);
