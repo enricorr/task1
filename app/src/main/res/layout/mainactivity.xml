@@ -14,7 +14,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/edtNombre"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -23,7 +23,7 @@
         android:text="Nombre" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/tvFechaNacimiento"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"

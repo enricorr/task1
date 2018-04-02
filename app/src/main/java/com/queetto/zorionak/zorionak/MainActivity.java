@@ -6,11 +6,23 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import butterknife.BindView;
+
 
 public class MainActivity extends AppCompatActivity {
 
         private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
+
+        @BindView(R.id.edtNombre) EditText edtNombre;
+        @BindView(R.id.tvFechaNacimiento) TextView tvFechaNacimiento;
+        @BindView(R.id.btnfecha) Button btnFecha;
+        @BindView(R.id.btnCamara) Button btnCamara;
+        @BindView(R.id.btnGuardar) Button btnGuardar;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {

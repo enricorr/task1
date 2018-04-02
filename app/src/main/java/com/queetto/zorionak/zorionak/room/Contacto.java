@@ -24,14 +24,6 @@ public class Contacto {
         this.name = name;
     }
 
-    public Date getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
-    }
-
     public String getImagen() {
         return imagen;
     }
@@ -46,15 +38,36 @@ public class Contacto {
     @ColumnInfo(name = "nombre")
     private String name;
 
-    @ColumnInfo(name = "fecha")
-    private Date fecha;
+
+    public int getMes() {
+        return mes;
+    }
+
+    public void setMes(int mes) {
+        this.mes = mes;
+    }
+
+    public int getDia() {
+        return dia;
+    }
+
+    public void setDia(int dia) {
+        this.dia = dia;
+    }
+
+    @ColumnInfo(name = "mes")
+    private int mes;
+
+    @ColumnInfo(name = "dia")
+    private int dia;
 
     @ColumnInfo(name = "uriimagen")
     private String imagen;
 
-    public Contacto(String name, Date fecha, String imagen) {
+    public Contacto(String name, int mes, int dia, String imagen) {
         this.name = name;
-        this.fecha = fecha;
+        this.mes = mes;
+        this.dia = dia;
         this.imagen = imagen;
     }
     // Getters and setters are ignored for brevity,

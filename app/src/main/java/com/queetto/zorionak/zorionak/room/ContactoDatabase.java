@@ -7,7 +7,6 @@ import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
 @Database(entities = { Contacto.class }, version = 1)
-@TypeConverters(DateConverter.class)
 public abstract class ContactoDatabase extends RoomDatabase {
     private static final String DB_NAME = "contactoDatabase.db";
     private static volatile ContactoDatabase instance;
