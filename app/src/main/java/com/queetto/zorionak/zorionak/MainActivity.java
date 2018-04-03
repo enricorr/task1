@@ -4,17 +4,22 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,7 +41,6 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -49,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
     private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
     private static final int CODE_CAMERA_INTENT = 2085;
     private static final int CODE_GALLERY_INTENT = 2086;
+    public final static String settingAlarm = "settingAlarm";
 
     @BindView(R.id.edtNombre) EditText edtNombre;
     @BindView(R.id.tvFechaNacimiento) TextView tvFechaNacimiento;
@@ -285,20 +290,36 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         return allContactos.size();
     }
 
-    private void settingBirthdayReceiver() {
-        AlarmManager alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, DetectBirthdayReceiver.class);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 6);
-
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+5000, alarmIntent);
-
-/*        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, alarmIntent);*/
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainmenu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
+
+    private void settingBirthdayReceiver() {
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        if (!sharedPreferences.getBoolean(settingAlarm, false)) {
+            AlarmManager alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(this, DetectBirthdayReceiver.class);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.HOUR_OF_DAY, 6);
+
+            /*alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(), 10000, alarmIntent);*/
+
+           alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY, alarmIntent);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(settingAlarm, true);
+            editor.apply();
+        }
+    }
+
 
 }
 

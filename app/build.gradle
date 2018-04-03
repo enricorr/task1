@@ -25,6 +25,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation "com.android.support:support-core-utils:27.1.0"
+    implementation "com.android.support:design:27.1.0"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     // Room (use 1.1.0-beta1 for latest beta)
     implementation "android.arch.persistence.room:runtime:1.0.0"

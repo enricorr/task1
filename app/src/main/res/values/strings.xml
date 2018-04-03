@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Zorionak</string>
+    <string name="app_bar_delete">Borrar Contactos</string>
 </resources>
