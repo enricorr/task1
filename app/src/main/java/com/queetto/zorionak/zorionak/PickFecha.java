@@ -11,6 +11,13 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 
+/**
+ * Proyecto: Zorionak
+ * Created by David Nuñez on 03/abr/18.
+ */
+
+
+// Fragmento que muestra el picker de fecha para el cumpleaños.
 public class PickFecha extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
     PickFecha.Results results;
@@ -22,7 +29,6 @@ public class PickFecha extends DialogFragment implements DatePickerDialog.OnDate
     }
 
     public PickFecha(){}
-
 
     @NonNull
     @Override

@@ -4,6 +4,12 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+/**
+ * Proyecto: Zorionak
+ * Created by David Nuñez on 03/abr/18.
+ */
+
+//Unica tabla dentro de la base de datos: id, nombre, dia, mes, localización de la imagen y bandera de aviso de ya notificado
 
 @Entity
 public class Contacto {

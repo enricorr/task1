@@ -4,13 +4,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
@@ -44,13 +41,17 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 
+/**
+ * Proyecto: Zorionak
+ * Created by David Nuñez on 03/abr/18.
+ */
+
 public class MainActivity extends AppCompatActivity implements PickFecha.Results {
 
     private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
     private static final int CODE_CAMERA_INTENT = 2085;
     private static final int CODE_GALLERY_INTENT = 2086;
     private CompositeDisposable mDisposable = new CompositeDisposable();
-    public final static String settingAlarm = "settingAlarm";
 
     @BindView(R.id.edtNombre) EditText edtNombre;
     @BindView(R.id.tvFechaNacimiento) TextView tvFechaNacimiento;
@@ -71,13 +72,10 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainactivity);
         ButterKnife.bind(this);
-        //Check if the application has draw over other apps permission or not?
-        //This permission is by default available for API<23. But for API > 23
-        //you have to ask for the permission in runtime.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
 
-            //If the draw over permission is not available open the settings screen
-            //to grant the permission.
+        // Revisa Permisos para colocar burbuja sobre otras apps.
+        // Solicita los permisos en tiempo de ejecución al usuario.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION);
@@ -87,16 +85,17 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         }
     }
 
-    /**
-     * Set and initialize the view elements.
-     */
+
+    // Inicializa las vistas con sus respectivos Listeners (Buttones y Campos de Edición)
     private void initializeView() {
 
+        // Inicia Dialogo para obtener fecha de cumpleaños.
         btnFecha.setOnClickListener(view -> {
             DialogFragment newFragment = new PickFecha();
             newFragment.show(getSupportFragmentManager(), "datePicker");
         });
 
+        // Acción para guardar los datos en la BD Local
         btnGuardar.setOnClickListener(view -> {
             if (!edtNombre.getText().toString().equals("")) {
                 if (mes!=0 && dia!=0) {
@@ -106,16 +105,21 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe((result) -> {
                                 Toast.makeText(this,
-                                        "Contacto Agregado. Zorionak le avisará de su cumpleñaos",
+                                        "Contacto Agregado. Zorionak le avisará de su cumpleaños",
                                         Toast.LENGTH_LONG).show();
                                 finish();}));
+                } else {
+                    tvFechaNacimiento.setError("Falta fecha de nacimiento");
                 }
             } else {
-                edtNombre.setError("Debe ingresar un nombre");
+                edtNombre.setError("Falta nombre");
             }
         });
 
+        // Acción cundo se quiere foto
         btnCamara.setOnClickListener(view -> selectImage());
+
+        // Muestra la cuenta de contactos en la app
         mDisposable.add(
         Single.fromCallable(this::countContactosBirthday)
                 .subscribeOn(Schedulers.io())
@@ -126,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
             }));
     }
 
+    // Guarda el Contacto
     private boolean guardaInformacion(String nombre, int mes, int dia, String uri) {
         ContactoDatabase
                 .getInstance(this)
@@ -134,14 +139,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         return true;
     }
 
-/*    private boolean borrarInformacion(String nombre, int mes, int dia, String uri) {
-        ContactoDatabase
-                .getInstance(this)
-                .getContactoDao()
-                .insert(new Contacto(nombre, mes, dia, uri));
-        return true;
-    }*/
-
+    // Dialogo para seleccionar si quiere una foto o escoge una ya existe.
     private void selectImage() {
         final CharSequence[] items = { "Tomar Foto", "Escoger una foto",
                 "Cancelar" };
@@ -150,11 +148,9 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         builder.setItems(items, (dialog, item) -> {
             boolean result= Utility.checkPermission(MainActivity.this);
             if (items[item].equals("Tomar Foto")) {
-                //userChoosenTask="Tomar Foto";
                 if(result)
                     dispatchTakePictureIntent();
             } else if (items[item].equals("Escoger una foto")) {
-                //userChoosenTask="Escoger una foto";
                 if(result)
                     galleryIntent();
             } else if (items[item].equals("Cancel")) {
@@ -164,81 +160,85 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         builder.show();
     }
 
+    // Inicia el programa para seleccionar una foto
     private void galleryIntent() {
         Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(pickPhoto , CODE_GALLERY_INTENT);
     }
 
-        @Override
-        protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+    // Resultado de escoger o tomar una foto y otorgar permisos para poner burbujas.
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
 
-            switch(requestCode) {
-                case CODE_DRAW_OVER_OTHER_APP_PERMISSION:
-                    //Check if the permission is granted or not.
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
-                        settingBirthdayReceiver();
-                        initializeView();
-                    } else {
-                        if (resultCode == RESULT_OK) {
-                            initializeView();
-                        } else { //Permission is not available
-                            Toast.makeText(this,
-                                    "No hay permiso para arrastrar sobre otras apps. Se cerrará la aplicación",
-                                    Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    }
-                    break;
-
-                case CODE_CAMERA_INTENT:
+        switch(requestCode) {
+            // Comprobación de si la app tiene permiso para usar las burbujas
+            case CODE_DRAW_OVER_OTHER_APP_PERMISSION:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
+                    settingBirthdayReceiver();
+                    initializeView();
+                } else {
                     if (resultCode == RESULT_OK) {
-                        galleryAddPic();
-                        if (contentUri!=null) {
-                            ivFoto.setImageURI(contentUri);
-                            ivFoto.setRotation(90);
-                            uriString = contentUri.toString();
-                        } else {
-                            uriString = "";
-                        }
-
+                        initializeView();
+                    } else { //Permission is not available
+                        Toast.makeText(this,
+                                "No hay permiso para arrastrar sobre otras apps. Se cerrará la aplicación",
+                                Toast.LENGTH_SHORT).show();
+                        finish();
                     }
-                    break;
-                case CODE_GALLERY_INTENT:
-                    if(resultCode == RESULT_OK){
-                        Uri selectedImage = imageReturnedIntent.getData();
-                        if (selectedImage!=null)
-                            uriString = selectedImage.toString();
-                        else
-                            uriString = "";
-                        ivFoto.setImageURI(selectedImage);
+                }
+                break;
+            // Resultado de tomar una foto
+            case CODE_CAMERA_INTENT:
+                if (resultCode == RESULT_OK) {
+                    galleryAddPic();
+                    if (contentUri!=null) {
+                        ivFoto.setImageURI(contentUri);
+                        setRotation(contentUri, ivFoto);
+                        uriString = contentUri.toString();
+                    } else {
+                        uriString = "";
                     }
-
-                    break;
-                default:
-                    super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
-
-            }
+                }
+                break;
+            // Resultado de escoger una foto
+            case CODE_GALLERY_INTENT:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    if (selectedImage!=null)
+                        uriString = selectedImage.toString();
+                    else
+                        uriString = "";
+                    ivFoto.setImageURI(selectedImage);
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
         }
+    }
 
+    // Almacena dia escogido por usuario
     @Override
     public void result_dia(int dia) {
         this.dia = dia;
     }
 
+    // Almacena mes escogido por usuario
     @Override
     public void result_mes(int mes) {
         this.mes = mes;
     }
 
+    // Coloca fecha de cumpleaños seleccionada por el usuario.
     @Override
     public void setFechaNacimiento() {
         if (dia!=0 && mes!=0) {
+            tvFechaNacimiento.setError(null);
             tvFechaNacimiento.setText(String.format(Locale.US,"Cumpleaños: %02d - %s",dia,Utility.mesString(mes)));
         }
     }
 
+    // Crea un archivo de imagen en el disco del celular para almacenar la foto tomada por el usuario
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
@@ -250,12 +250,11 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-
-        // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
+    // Habilita la camara solo en el caso de que se pueda crear el archivo para almacenar la foto
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -278,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         }
     }
 
+    // Una vez que se toma la foto esta se almacena en la galeria privada del app.
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         File f = new File(mCurrentPhotoPath);
@@ -286,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         this.sendBroadcast(mediaScanIntent);
     }
 
+    // Cuenta los contactos de la base de datos local del telefono
     private int countContactosBirthday() {
         List<Contacto> allContactos = ContactoDatabase
                 .getInstance(this)
@@ -294,30 +295,36 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         return allContactos.size();
     }
 
+    // Ajusta la rotación de la imagen que se muestra al usuario
+    private void setRotation(Uri uri, ImageView view) {
+        mDisposable.add(
+                Single.fromCallable(() -> Utility.getExifData(this, uri))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((rotationAngle) -> {
+                            if (rotationAngle!=0) {
+                                view.setRotation(rotationAngle);
+                            }
+                        }));
+    }
+
+    // Coloca la Alarma que hará que surja la burbuja  - Configurada todos los dias a las 6am
+    // Solo se coloca una vez.
     private void settingBirthdayReceiver() {
+        AlarmManager alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, DetectBirthdayReceiver.class);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 6);
 
-        if (!sharedPreferences.getBoolean(settingAlarm, false)) {
-            AlarmManager alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(this, DetectBirthdayReceiver.class);
-            PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        if (alarmMgr!=null) {
+            //alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 60000, alarmIntent);
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.set(Calendar.HOUR_OF_DAY, 6);
+            alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                        AlarmManager.INTERVAL_DAY, alarmIntent);
 
-            if (alarmMgr!=null) {
-                alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 10000, alarmIntent);
-
-/*                alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                        AlarmManager.INTERVAL_DAY, alarmIntent);*/
-
-
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(settingAlarm, true);
-                editor.apply();
-            }
         }
     }
 

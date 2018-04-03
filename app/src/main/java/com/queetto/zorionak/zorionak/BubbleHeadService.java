@@ -15,10 +15,22 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.queetto.zorionak.zorionak.tools.Utility;
+
 import java.util.Calendar;
 
-public class BubbleHeadService extends Service {
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
+/**
+ * Proyecto: Zorionak
+ * Created by David Nuñez on 03/abr/18.
+ */
+
+// Servicio que tiene la función de mostrar la bubble utilizanod el icono del app, la foto que tomo el usuario o la imagen que selecciono.
+public class BubbleHeadService extends Service {
 
     private WindowManager mWindowManager;
     private View mChatHeadView;
@@ -27,7 +39,7 @@ public class BubbleHeadService extends Service {
     private String nombre;
     private int dia;
     private int mes;
-
+    private CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -82,8 +94,9 @@ public class BubbleHeadService extends Service {
 
         //Add the view to the window
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        mWindowManager.addView(mChatHeadView, params);
-
+        if (mWindowManager!=null) {
+            mWindowManager.addView(mChatHeadView, params);
+        }
         //Set the close button.
         ImageView closeButton = mChatHeadView.findViewById(R.id.close_btn);
         closeButton.setOnClickListener(v -> stopSelf());
@@ -92,12 +105,12 @@ public class BubbleHeadService extends Service {
         ImageView chatHeadImage = mChatHeadView.findViewById(R.id.bubble_head_profile_iv);
         if (uriImage!=null) {
             chatHeadImage.setImageURI(uriImage);
-            chatHeadImage.setRotation(90);
+            setRotation(uriImage, chatHeadImage);
+            //chatHeadImage.setRotation(90);
         } else {
             chatHeadImage.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         }
         chatHeadImage.setOnTouchListener(new View.OnTouchListener() {
-            private int lastAction;
             private int initialX;
             private int initialY;
             private float initialTouchX;
@@ -119,13 +132,9 @@ public class BubbleHeadService extends Service {
                         //get the touch location
                         initialTouchX = event.getRawX();
                         initialTouchY = event.getRawY();
-
-                        lastAction = event.getAction();
                         return true;
                     case MotionEvent.ACTION_UP:
-                        //As we implemented on touch listener with ACTION_MOVE,
-                        //we have to check if the previous action was ACTION_DOWN
-                        //to identify if the user clicked the view or not.
+                        // Detección del click sobre la burbuja - Sensibilidad de 200 milisegundos.
                         long clickDuration = Calendar.getInstance().getTimeInMillis() - startClickTime;
                         if(clickDuration < MAX_CLICK_DURATION) {
                             //Open the chat conversation click.
@@ -143,23 +152,6 @@ public class BubbleHeadService extends Service {
                             //close the service and remove the chat heads
                             stopSelf();
                         }
-/*                        if (lastAction == MotionEvent.ACTION_DOWN) {
-                            //Open the chat conversation click.
-                            mChatHeadView.performClick();
-                            Intent intent = new Intent(BubbleHeadService.this, BubbleActivity.class);
-                            Bundle extras = new Bundle();
-                            extras.putString("nombre", nombre);
-                            extras.putInt("dia", dia);
-                            extras.putInt("mes", mes);
-                            extras.putString("uri", uriString);
-                            intent.putExtras(extras);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-
-                            //close the service and remove the chat heads
-                            stopSelf();
-                        }*/
-                        lastAction = event.getAction();
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         //Calculate the X and Y coordinates of the view.
@@ -168,7 +160,6 @@ public class BubbleHeadService extends Service {
 
                         //Update the layout with new X & Y coordinate
                         mWindowManager.updateViewLayout(mChatHeadView, params);
-                        lastAction = event.getAction();
                         return true;
                 }
                 return false;
@@ -176,8 +167,22 @@ public class BubbleHeadService extends Service {
         });
     }
 
+    // Ajusta la rotación de la imagen que se muestra al usuario
+    private void setRotation(Uri uri, ImageView view) {
+        mDisposable.add(
+                Single.fromCallable(() -> Utility.getExifData(this, uri))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((rotationAngle) -> {
+                            if (rotationAngle!=0) {
+                                view.setRotation(rotationAngle);
+                            }
+                        }));
+    }
+
     @Override
     public void onDestroy() {
+        mDisposable.dispose();
         super.onDestroy();
         if (mChatHeadView != null) mWindowManager.removeView(mChatHeadView);
     }

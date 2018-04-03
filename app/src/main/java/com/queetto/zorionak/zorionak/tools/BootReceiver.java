@@ -9,9 +9,12 @@ import android.content.Intent;
 import java.util.Calendar;
 
 /**
- * Proyecto: zorionak
- * Created by enricorr on 02/04/18.
+ * Proyecto: Zorionak
+ * Created by David Nuñez on 03/abr/18.
  */
+
+
+// Esta clase coloca la alarma para detectar las burbujas una vez que el telefono se a booteado.
 public class BootReceiver extends BroadcastReceiver {
 
     private AlarmManager alarmMgr;
@@ -27,6 +30,8 @@ public class BootReceiver extends BroadcastReceiver {
         }
     }
 
+    // Coloca la Alarma que hará que surja la burbuja  - Configurada todos los dias a las 6am
+    // Solo se coloca una vez.
     private void setAlarm() {
         alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, DetectBirthdayReceiver.class);
@@ -37,8 +42,8 @@ public class BootReceiver extends BroadcastReceiver {
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.HOUR_OF_DAY, 6);
 
-        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, alarmIntent);
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                        AlarmManager.INTERVAL_DAY, alarmIntent);
     }
 
 }
