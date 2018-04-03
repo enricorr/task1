@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import java.util.Calendar;
+
 public class BubbleHeadService extends Service {
 
 
@@ -90,6 +92,7 @@ public class BubbleHeadService extends Service {
         ImageView chatHeadImage = mChatHeadView.findViewById(R.id.bubble_head_profile_iv);
         if (uriImage!=null) {
             chatHeadImage.setImageURI(uriImage);
+            chatHeadImage.setRotation(90);
         } else {
             chatHeadImage.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         }
@@ -100,10 +103,14 @@ public class BubbleHeadService extends Service {
             private float initialTouchX;
             private float initialTouchY;
 
+            private static final int MAX_CLICK_DURATION = 200;
+            private long startClickTime;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        startClickTime = Calendar.getInstance().getTimeInMillis();
 
                         //remember the initial position.
                         initialX = params.x;
@@ -119,7 +126,8 @@ public class BubbleHeadService extends Service {
                         //As we implemented on touch listener with ACTION_MOVE,
                         //we have to check if the previous action was ACTION_DOWN
                         //to identify if the user clicked the view or not.
-                        if (lastAction == MotionEvent.ACTION_DOWN) {
+                        long clickDuration = Calendar.getInstance().getTimeInMillis() - startClickTime;
+                        if(clickDuration < MAX_CLICK_DURATION) {
                             //Open the chat conversation click.
                             mChatHeadView.performClick();
                             Intent intent = new Intent(BubbleHeadService.this, BubbleActivity.class);
@@ -135,6 +143,22 @@ public class BubbleHeadService extends Service {
                             //close the service and remove the chat heads
                             stopSelf();
                         }
+/*                        if (lastAction == MotionEvent.ACTION_DOWN) {
+                            //Open the chat conversation click.
+                            mChatHeadView.performClick();
+                            Intent intent = new Intent(BubbleHeadService.this, BubbleActivity.class);
+                            Bundle extras = new Bundle();
+                            extras.putString("nombre", nombre);
+                            extras.putInt("dia", dia);
+                            extras.putInt("mes", mes);
+                            extras.putString("uri", uriString);
+                            intent.putExtras(extras);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+
+                            //close the service and remove the chat heads
+                            stopSelf();
+                        }*/
                         lastAction = event.getAction();
                         return true;
                     case MotionEvent.ACTION_MOVE:

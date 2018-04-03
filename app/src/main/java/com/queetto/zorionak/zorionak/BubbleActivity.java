@@ -39,6 +39,7 @@ public class BubbleActivity extends AppCompatActivity {
         if (uriString!=null && !uriString.equals("")) {
             Uri uriImage = Uri.parse(uriString);
             ivFotoContacto.setImageURI(uriImage);
+            ivFotoContacto.setRotation(90);
         } else {
             ivFotoContacto.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         }

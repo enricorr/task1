@@ -17,8 +17,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -109,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
                             .subscribe((result) -> {
                                 Toast.makeText(this,
                                         "Contacto Agregado. Zorionak le avisará de su cumpleñaos",
-                                        Toast.LENGTH_SHORT).show();
+                                        Toast.LENGTH_LONG).show();
                                 finish();}));
                 }
             } else {
@@ -199,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
                         galleryAddPic();
                         if (contentUri!=null) {
                             ivFoto.setImageURI(contentUri);
+                            ivFoto.setRotation(90);
                             uriString = contentUri.toString();
                         } else {
                             uriString = "";
@@ -293,13 +292,6 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
                 .getContactoDao()
                 .getAllContacts();
         return allContactos.size();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.mainmenu, menu);
-        return super.onCreateOptionsMenu(menu);
     }
 
     private void settingBirthdayReceiver() {
