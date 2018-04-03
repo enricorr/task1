@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.widget.DatePicker;
 
@@ -22,6 +23,8 @@ public class PickFecha extends DialogFragment implements DatePickerDialog.OnDate
 
     public PickFecha(){}
 
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the current date as the default date in the picker
@@ -31,7 +34,12 @@ public class PickFecha extends DialogFragment implements DatePickerDialog.OnDate
         int day = c.get(Calendar.DAY_OF_MONTH);
 
         // Create a new instance of DatePickerDialog and return it
-        return new DatePickerDialog(getActivity(), this, year, month, day);
+        if (getActivity()!=null) {
+            return new DatePickerDialog(getActivity(), this, year, month, day);
+        } else {
+            return null;
+        }
+
     }
 
     public void onDateSet(DatePicker view, int year, int month, int day) {

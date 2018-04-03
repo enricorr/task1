@@ -44,7 +44,8 @@ public class DetectBirthdayReceiver extends BroadcastReceiver {
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
             for(Contacto contacto : allContactos) {
-                if (contacto.getDia() == day && contacto.getMes() == month) {
+                if (contacto.getDia() == day && contacto.getMes() == month && contacto.getAviso() == 0) {
+                    updateContacto(contacto.getCid(), 1);
                     Intent intent = new Intent(context, BubbleHeadService.class);
                     Bundle extras = new Bundle();
                     extras.putString("nombre", contacto.getName());
@@ -53,10 +54,17 @@ public class DetectBirthdayReceiver extends BroadcastReceiver {
                     extras.putString("uri", contacto.getImagen());
                     intent.putExtras(extras);
                     context.startService(intent);
+                } else {
+                    if (!(contacto.getDia() == day && contacto.getMes() == month)) {
+                        updateContacto(contacto.getCid(), 0);
+                    }
                 }
             }
         }
         return true;
+    }
 
+    private void updateContacto(int id, int aviso) {
+        ContactoDatabase.getInstance(context).getContactoDao().updateContact(id, aviso);
     }
 }

@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -41,6 +42,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
     private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
     private static final int CODE_CAMERA_INTENT = 2085;
     private static final int CODE_GALLERY_INTENT = 2086;
+    private CompositeDisposable mDisposable = new CompositeDisposable();
     public final static String settingAlarm = "settingAlarm";
 
     @BindView(R.id.edtNombre) EditText edtNombre;
@@ -99,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         btnGuardar.setOnClickListener(view -> {
             if (!edtNombre.getText().toString().equals("")) {
                 if (mes!=0 && dia!=0) {
+                    mDisposable.add(
                     Single.fromCallable(() -> guardaInformacion(edtNombre.getText().toString(), mes, dia, uriString))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -106,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
                                 Toast.makeText(this,
                                         "Contacto Agregado. Zorionak le avisará de su cumpleñaos",
                                         Toast.LENGTH_SHORT).show();
-                                finish();});
+                                finish();}));
                 }
             } else {
                 edtNombre.setError("Debe ingresar un nombre");
@@ -114,14 +118,14 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         });
 
         btnCamara.setOnClickListener(view -> selectImage());
-
-        Single.fromCallable(()->countContactosBirthday())
+        mDisposable.add(
+        Single.fromCallable(this::countContactosBirthday)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((result) -> {
                     String total = "Total Contactos: " + String.format(Locale.US,"%02d", result);
                     tvCountContactos.setText(total);
-            });
+            }));
     }
 
     private boolean guardaInformacion(String nombre, int mes, int dia, String uri) {
@@ -132,13 +136,13 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         return true;
     }
 
-    private boolean borrarInformacion(String nombre, int mes, int dia, String uri) {
+/*    private boolean borrarInformacion(String nombre, int mes, int dia, String uri) {
         ContactoDatabase
                 .getInstance(this)
                 .getContactoDao()
                 .insert(new Contacto(nombre, mes, dia, uri));
         return true;
-    }
+    }*/
 
     private void selectImage() {
         final CharSequence[] items = { "Tomar Foto", "Escoger una foto",
@@ -176,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
                     //Check if the permission is granted or not.
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
+                        settingBirthdayReceiver();
                         initializeView();
                     } else {
                         if (resultCode == RESULT_OK) {
@@ -191,12 +196,6 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
 
                 case CODE_CAMERA_INTENT:
                     if (resultCode == RESULT_OK) {
-/*                        Bundle extras = imageReturnedIntent.getExtras();
-                        if (extras!=null) {
-                            Bitmap imageBitmap = (Bitmap) extras.get("data");
-                            ivFoto.setImageBitmap(imageBitmap);
-                            galleryAddPic();
-                        }*/
                         galleryAddPic();
                         if (contentUri!=null) {
                             ivFoto.setImageURI(contentUri);
@@ -316,17 +315,25 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
             calendar.setTimeInMillis(System.currentTimeMillis());
             calendar.set(Calendar.HOUR_OF_DAY, 6);
 
-            /*alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(), 10000, alarmIntent);*/
+            if (alarmMgr!=null) {
+                alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 10000, alarmIntent);
 
-           alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, alarmIntent);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(settingAlarm, true);
-            editor.apply();
+/*                alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                        AlarmManager.INTERVAL_DAY, alarmIntent);*/
+
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(settingAlarm, true);
+                editor.apply();
+            }
         }
     }
 
-
+    @Override
+    protected void onDestroy() {
+        mDisposable.dispose();
+        super.onDestroy();
+    }
 }
 
 

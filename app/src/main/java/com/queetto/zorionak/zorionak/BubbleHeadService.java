@@ -1,5 +1,6 @@
 package com.queetto.zorionak.zorionak;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -34,10 +35,14 @@ public class BubbleHeadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        nombre = intent.getExtras().getString("nombre");
-        dia = intent.getExtras().getInt("dia");
-        mes = intent.getExtras().getInt("mes");
-        uriString = intent.getExtras().getString("uri");
+        Bundle extras = intent.getExtras();
+        if (extras!=null) {
+            nombre = extras.getString("nombre");
+            dia = extras.getInt("dia");
+            mes = extras.getInt("mes");
+            uriString = extras.getString("uri");
+        }
+
         if (uriString!=null && !uriString.equals("")) {
             uriImage = Uri.parse(uriString);
         }
@@ -45,6 +50,7 @@ public class BubbleHeadService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void creation() {
         super.onCreate();
 
@@ -68,7 +74,7 @@ public class BubbleHeadService extends Service {
                 PixelFormat.TRANSLUCENT);
 
         //Specify the chat head position
-        params.gravity = Gravity.TOP | Gravity.LEFT;        //Initially view will be added to top-left corner
+        params.gravity = Gravity.TOP | Gravity.START;        //Initially view will be added to top-left corner
         params.x = 0;
         params.y = 100;
 
@@ -77,14 +83,8 @@ public class BubbleHeadService extends Service {
         mWindowManager.addView(mChatHeadView, params);
 
         //Set the close button.
-        ImageView closeButton = (ImageView) mChatHeadView.findViewById(R.id.close_btn);
-        closeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //close the service and remove the chat head from the window
-                stopSelf();
-            }
-        });
+        ImageView closeButton = mChatHeadView.findViewById(R.id.close_btn);
+        closeButton.setOnClickListener(v -> stopSelf());
 
         //Drag and move chat head using user's touch action.
         ImageView chatHeadImage = mChatHeadView.findViewById(R.id.bubble_head_profile_iv);
@@ -121,6 +121,7 @@ public class BubbleHeadService extends Service {
                         //to identify if the user clicked the view or not.
                         if (lastAction == MotionEvent.ACTION_DOWN) {
                             //Open the chat conversation click.
+                            mChatHeadView.performClick();
                             Intent intent = new Intent(BubbleHeadService.this, BubbleActivity.class);
                             Bundle extras = new Bundle();
                             extras.putString("nombre", nombre);

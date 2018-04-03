@@ -20,4 +20,7 @@ public interface ContactoDao {
 
     @Query("DELETE FROM contacto")
     void eraseContacto();
+
+    @Query("UPDATE contacto SET aviso = :avisod  WHERE id = :tid")
+    int updateContact(int tid, int avisod);
 }

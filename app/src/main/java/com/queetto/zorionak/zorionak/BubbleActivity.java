@@ -19,20 +19,25 @@ public class BubbleActivity extends AppCompatActivity {
     @BindView(R.id.tvFelicita) TextView tvFelicita;
     @BindView(R.id.tvFechaContacto)  TextView tvFechaContacto;
 
-    private Uri uriImage;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacto);
         ButterKnife.bind(this);
         Bundle extras = getIntent().getExtras();
-        String nombre = extras.getString("nombre");
-        int dia = extras.getInt("dia");
-        int mes = extras.getInt("mes");
-        String uriString = extras.getString("uri");
+        String nombre="";
+        String uriString="";
+        int dia = 0;
+        int mes = 0;
+        if (extras!=null) {
+            nombre = extras.getString("nombre");
+            dia = extras.getInt("dia");
+            mes = extras.getInt("mes");
+            uriString = extras.getString("uri");
+        }
+
         if (uriString!=null && !uriString.equals("")) {
-            uriImage = Uri.parse(uriString);
+            Uri uriImage = Uri.parse(uriString);
             ivFotoContacto.setImageURI(uriImage);
         } else {
             ivFotoContacto.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
