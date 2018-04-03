@@ -10,10 +10,11 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,12 +24,13 @@
 
         <activity
             android:name=".BubbleActivity"
-            android:label="Chat with Android">
+            android:label="Cumpleaños"
+            android:screenOrientation="portrait">
 
         </activity>
 
         <service
-            android:name=".ChatHeadService"
+            android:name=".BubbleHeadService"
             android:enabled="true"
             android:exported="false"/>
 
@@ -42,6 +44,16 @@
         <receiver android:name=".tools.DetectBirthdayReceiver"
         android:enabled="true">
         </receiver>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.queetto.zorionak.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
 
     </application>
 

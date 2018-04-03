@@ -5,14 +5,24 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 
+import com.queetto.zorionak.zorionak.room.Contacto;
+
+import java.util.Arrays;
+import java.util.List;
+
 public class Utility {
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
+
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static boolean checkPermission(final Context context)
     {
@@ -44,4 +54,15 @@ public class Utility {
             return true;
         }
     }
+
+    // mes entero de 1 a 12
+    public static String mesString(int mes) {
+        List<String> meses = Arrays.asList("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic");
+        if (mes >=0 && mes <=11) {
+            return meses.get(mes);
+        } else {
+            return "";
+        }
+    }
+
 }

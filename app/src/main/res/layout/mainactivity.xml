@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -10,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="Ingrese Datos del contacto"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Ingrese Datos del contacto" />
 
     <EditText
         android:id="@+id/edtNombre"
@@ -20,6 +21,7 @@
         android:layout_margin="10dp"
         android:ems="10"
         android:inputType="textPersonName"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:hint="Nombre" />
 
     <TextView
@@ -28,8 +30,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:text="Fecha de Nacimiento: "
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+        android:text="Cumpleaños: "
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Button
         android:id="@+id/btnfecha"
@@ -37,13 +39,17 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="20dp"
+        android:textColor="@color/colorPrimary"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:text="Ingrese Fecha de Nacimiento" />
 
     <ImageView
         android:id="@+id/ivfoto"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:src="@mipmap/ic_launcher" />
 
     <Button
         android:id="@+id/btnCamara"
@@ -52,6 +58,8 @@
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         android:layout_gravity="center_horizontal"
+        android:textColor="@color/colorPrimary"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:text="Ingrese una foto" />
 
     <Button
@@ -61,6 +69,19 @@
         android:layout_marginTop="20dp"
         android:textColor="@color/colorAccent"
         android:layout_gravity="center_horizontal"
+        style="?borderlessButtonStyle"
         android:text="Guardar la informacion" />
+
+
+    <TextView
+        android:id="@+id/tvCountContacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="Total Contactos: 0"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </LinearLayout>

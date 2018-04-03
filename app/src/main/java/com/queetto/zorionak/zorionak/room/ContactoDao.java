@@ -17,4 +17,7 @@ public interface ContactoDao {
 
     @Update
     void update(Contacto... repos);
+
+    @Query("DELETE FROM contacto")
+    void eraseContacto();
 }

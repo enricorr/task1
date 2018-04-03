@@ -4,6 +4,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,36 +14,56 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-public class ChatHeadService extends Service {
+public class BubbleHeadService extends Service {
 
 
     private WindowManager mWindowManager;
     private View mChatHeadView;
     private Uri uriImage;
+    private String uriString;
+    private String nombre;
+    private int dia;
+    private int mes;
 
-    public ChatHeadService() {
-    }
-
-    public ChatHeadService(String uri) {
-        uriImage =  Uri.parse(uri);
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+
     @Override
-    public void onCreate() {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        nombre = intent.getExtras().getString("nombre");
+        dia = intent.getExtras().getInt("dia");
+        mes = intent.getExtras().getInt("mes");
+        uriString = intent.getExtras().getString("uri");
+        if (uriString!=null && !uriString.equals("")) {
+            uriImage = Uri.parse(uriString);
+        }
+        creation();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void creation() {
         super.onCreate();
+
+
         //Inflate the chat head layout we created
         mChatHeadView = LayoutInflater.from(this).inflate(R.layout.layout_chat_head, null);
+
+        int LAYOUT_FLAG;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
+        }
 
         //Add the view to the window.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
+                LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
 
@@ -65,9 +87,11 @@ public class ChatHeadService extends Service {
         });
 
         //Drag and move chat head using user's touch action.
-        final ImageView chatHeadImage = (ImageView) mChatHeadView.findViewById(R.id.chat_head_profile_iv);
+        ImageView chatHeadImage = mChatHeadView.findViewById(R.id.bubble_head_profile_iv);
         if (uriImage!=null) {
             chatHeadImage.setImageURI(uriImage);
+        } else {
+            chatHeadImage.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         }
         chatHeadImage.setOnTouchListener(new View.OnTouchListener() {
             private int lastAction;
@@ -97,7 +121,13 @@ public class ChatHeadService extends Service {
                         //to identify if the user clicked the view or not.
                         if (lastAction == MotionEvent.ACTION_DOWN) {
                             //Open the chat conversation click.
-                            Intent intent = new Intent(ChatHeadService.this, BubbleActivity.class);
+                            Intent intent = new Intent(BubbleHeadService.this, BubbleActivity.class);
+                            Bundle extras = new Bundle();
+                            extras.putString("nombre", nombre);
+                            extras.putInt("dia", dia);
+                            extras.putInt("mes", mes);
+                            extras.putString("uri", uriString);
+                            intent.putExtras(extras);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
 

@@ -3,8 +3,9 @@ package com.queetto.zorionak.zorionak.tools;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
-import com.queetto.zorionak.zorionak.ChatHeadService;
+import com.queetto.zorionak.zorionak.BubbleHeadService;
 import com.queetto.zorionak.zorionak.room.Contacto;
 import com.queetto.zorionak.zorionak.room.ContactoDatabase;
 
@@ -44,7 +45,14 @@ public class DetectBirthdayReceiver extends BroadcastReceiver {
             int day = c.get(Calendar.DAY_OF_MONTH);
             for(Contacto contacto : allContactos) {
                 if (contacto.getDia() == day && contacto.getMes() == month) {
-                    context.startService(new Intent(context, ChatHeadService.class));
+                    Intent intent = new Intent(context, BubbleHeadService.class);
+                    Bundle extras = new Bundle();
+                    extras.putString("nombre", contacto.getName());
+                    extras.putInt("dia", contacto.getDia());
+                    extras.putInt("mes", contacto.getMes());
+                    extras.putString("uri", contacto.getImagen());
+                    intent.putExtras(extras);
+                    context.startService(intent);
                 }
             }
         }
