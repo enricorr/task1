@@ -3,6 +3,7 @@ package com.queetto.zorionak.zorionak;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.IBinder;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,8 +17,13 @@ public class ChatHeadService extends Service {
 
     private WindowManager mWindowManager;
     private View mChatHeadView;
+    private Uri uriImage;
 
     public ChatHeadService() {
+    }
+
+    public ChatHeadService(String uri) {
+        uriImage =  Uri.parse(uri);
     }
 
     @Override
@@ -60,6 +66,9 @@ public class ChatHeadService extends Service {
 
         //Drag and move chat head using user's touch action.
         final ImageView chatHeadImage = (ImageView) mChatHeadView.findViewById(R.id.chat_head_profile_iv);
+        if (uriImage!=null) {
+            chatHeadImage.setImageURI(uriImage);
+        }
         chatHeadImage.setOnTouchListener(new View.OnTouchListener() {
             private int lastAction;
             private int initialX;

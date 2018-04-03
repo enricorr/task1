@@ -3,6 +3,8 @@
     package="com.queetto.zorionak.zorionak">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:allowBackup="true"
@@ -29,6 +31,18 @@
             android:name=".ChatHeadService"
             android:enabled="true"
             android:exported="false"/>
+
+        <receiver android:name=".tools.BootReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".tools.DetectBirthdayReceiver"
+        android:enabled="true">
+        </receiver>
+
     </application>
 
 </manifest>

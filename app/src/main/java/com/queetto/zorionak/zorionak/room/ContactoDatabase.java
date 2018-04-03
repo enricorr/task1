@@ -11,7 +11,7 @@ public abstract class ContactoDatabase extends RoomDatabase {
     private static final String DB_NAME = "contactoDatabase.db";
     private static volatile ContactoDatabase instance;
 
-    static synchronized ContactoDatabase getInstance(Context context) {
+    public static synchronized ContactoDatabase getInstance(Context context) {
         if (instance == null) {
             instance = create(context);
         }

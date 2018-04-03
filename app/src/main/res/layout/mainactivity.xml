@@ -20,7 +20,7 @@
         android:layout_margin="10dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Nombre" />
+        android:hint="Nombre" />
 
     <TextView
         android:id="@+id/tvFechaNacimiento"
@@ -40,7 +40,7 @@
         android:text="Ingrese Fecha de Nacimiento" />
 
     <ImageView
-        android:id="@+id/foto"
+        android:id="@+id/ivfoto"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center_horizontal" />
