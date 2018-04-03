@@ -5,12 +5,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -45,8 +43,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-import static android.os.Environment.getExternalStoragePublicDirectory;
-
 
 public class MainActivity extends AppCompatActivity implements PickFecha.Results {
 
@@ -67,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
     private int dia = 0;
     private String uriString="";
     private String mCurrentPhotoPath;
+    private Uri contentUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,12 +191,20 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
 
                 case CODE_CAMERA_INTENT:
                     if (resultCode == RESULT_OK) {
-                        Bundle extras = imageReturnedIntent.getExtras();
+/*                        Bundle extras = imageReturnedIntent.getExtras();
                         if (extras!=null) {
                             Bitmap imageBitmap = (Bitmap) extras.get("data");
                             ivFoto.setImageBitmap(imageBitmap);
                             galleryAddPic();
+                        }*/
+                        galleryAddPic();
+                        if (contentUri!=null) {
+                            ivFoto.setImageURI(contentUri);
+                            uriString = contentUri.toString();
+                        } else {
+                            uriString = "";
                         }
+
                     }
                     break;
                 case CODE_GALLERY_INTENT:
@@ -240,7 +245,8 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        //File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -266,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.queetto.zorionak.fileprovider",
+                        "com.queetto.zorionak.zorionak.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent,  CODE_CAMERA_INTENT);
@@ -277,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements PickFecha.Results
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
+        contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
     }
